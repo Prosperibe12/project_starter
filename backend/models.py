@@ -48,6 +48,7 @@ class User(HelperModel,AbstractBaseUser,PermissionsMixin):
     first_name = models.CharField(_("first name"), max_length=150, blank=False, null=False)
     last_name = models.CharField(_("last name"), max_length=150, blank=False, null=False)
     email = models.EmailField(_("email address"), blank=False, null=False, unique=True)
+    phone_no = models.IntegerField(_("Phone Number"), blank=True, null=True)
     address = models.CharField(_("Address"), blank=True, null=True, max_length=250)
     city = models.CharField(_("City"), blank=True, null=True, max_length=250)
     country = models.CharField(_("Country"), blank=True, null=True, max_length=250)
