@@ -1,0 +1,8 @@
+[run]
+source = backend
+command_line = manage.py test backend 
+omit = 
+    venv
+    */migrations/*
+    */tests/*
+    */__init__.py
