@@ -1,4 +1,5 @@
 from django.contrib.sites.shortcuts import get_current_site 
+from django.urls import reverse
 
 from rest_framework import generics
 from rest_framework import status 
@@ -25,11 +26,11 @@ class RegisterView(generics.GenericAPIView):
             
             # send email notification and link for account activation
             domain_name = get_current_site(request).domain
+            abs_path = reverse('verify-email')
             user = models.User.objects.get(email=serializer_data.data['email'])
             token = RefreshToken.for_user(user).access_token
-            email_message = RegisterEmailNotification(domain_name, user, token).send_email_notification()
-            if email_message:
-                return utils.CustomResponse.Success(serializer_data.data, status=status.HTTP_201_CREATED)
+            RegisterEmailNotification().send_email_notification(domain_name, user, token,abs_path)
+            return utils.CustomResponse.Success(serializer_data.data, status=status.HTTP_201_CREATED)
         return utils.CustomResponse.Failure(serializer_data.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class VerifyEmail(generics.GenericAPIView):
