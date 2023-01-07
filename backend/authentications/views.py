@@ -1,9 +1,11 @@
 from django.contrib.sites.shortcuts import get_current_site 
 from django.urls import reverse
+from django.conf import settings
 
 from rest_framework import generics
 from rest_framework import status 
 from rest_framework_simplejwt.tokens import RefreshToken
+import jwt
 
 from backend import utils 
 from backend.authentications import serializers
@@ -34,9 +36,22 @@ class RegisterView(generics.GenericAPIView):
         return utils.CustomResponse.Failure(serializer_data.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class VerifyEmail(generics.GenericAPIView):
-    
+    '''
+    A view that verifies a user email and set user.is_verified attribute to True
+    '''
     authentication_classes = ()
     permission_classes = ()
     
     def get(self, request):
-        pass 
+        token = request.GET.get('token')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY)
+            user = models.User.objects.get(id=payload['user_id'])
+            if not user.is_verified:
+                user.is_verified = True
+                user.save()
+                return utils.CustomResponse.Success("Successfully Activated", status=status.HTTP_200_OK)
+        except jwt.ExpiredSignatureError as e:
+            return utils.CustomResponse.Failure("Activation Link Expired", status=status.HTTP_400_BAD_REQUEST)
+        except jwt.DecodeError as e:
+            return utils.CustomResponse.Failure("Invalid Token", status=status.HTTP_400_BAD_REQUEST)
